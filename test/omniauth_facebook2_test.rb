@@ -119,18 +119,18 @@ class OmniauthFacebook2Test < Minitest::Test
   def test_uid_info_credentials_and_extra_are_derived_from_raw_info
     strategy = build_strategy
     raw_info = {
-      'id' => '10230653256947200',
-      'name' => 'Claudio Poli',
-      'email' => 'claudio@icorete.ch'
+      'id' => '12345678901234567',
+      'name' => 'Sample User',
+      'email' => 'sample.user@example.test'
     }
 
     token = FakeAccessToken.new(raw_info)
     strategy.define_singleton_method(:access_token) { token }
 
-    assert_equal '10230653256947200', strategy.uid
-    assert_equal 'Claudio Poli', strategy.info['name']
-    assert_equal 'claudio@icorete.ch', strategy.info['email']
-    assert_equal 'https://graph.facebook.com/v25.0/10230653256947200/picture', strategy.info['image']
+    assert_equal '12345678901234567', strategy.uid
+    assert_equal 'Sample User', strategy.info['name']
+    assert_equal 'sample.user@example.test', strategy.info['email']
+    assert_equal 'https://graph.facebook.com/v25.0/12345678901234567/picture', strategy.info['image']
 
     assert_equal(
       {

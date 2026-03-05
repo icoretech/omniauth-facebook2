@@ -83,11 +83,11 @@ Example payload from `request.env['omniauth.auth']` (captured from a real smoke 
 
 ```json
 {
-  "uid": "10230653256947200",
+  "uid": "12345678901234567",
   "info": {
-    "email": "claudio@icorete.ch",
-    "name": "Claudio Poli",
-    "image": "https://graph.facebook.com/v25.0/10230653256947200/picture"
+    "email": "sample.user@example.test",
+    "name": "Sample User",
+    "image": "https://graph.facebook.com/v25.0/12345678901234567/picture"
   },
   "credentials": {
     "token": "[REDACTED]",
@@ -96,9 +96,9 @@ Example payload from `request.env['omniauth.auth']` (captured from a real smoke 
   },
   "extra": {
     "raw_info": {
-      "name": "Claudio Poli",
-      "email": "claudio@icorete.ch",
-      "id": "10230653256947200"
+      "name": "Sample User",
+      "email": "sample.user@example.test",
+      "id": "12345678901234567"
     }
   }
 }

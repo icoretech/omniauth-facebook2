@@ -99,9 +99,9 @@ class RailsIntegrationTest < Minitest::Test
 
     payload = JSON.parse(last_response.body)
 
-    assert_equal '10230653256947200', payload['uid']
-    assert_equal 'Claudio Poli', payload['name']
-    assert_equal 'claudio@icorete.ch', payload['email']
+    assert_equal '12345678901234567', payload['uid']
+    assert_equal 'Sample User', payload['name']
+    assert_equal 'sample.user@example.test', payload['email']
 
     assert_requested :post, 'https://graph.facebook.com/v25.0/oauth/access_token', times: 1
     assert_requested :get, %r{\Ahttps://graph\.facebook\.com/v25\.0/me\?}, times: 1
@@ -141,9 +141,9 @@ class RailsIntegrationTest < Minitest::Test
         status: 200,
         headers: { 'Content-Type' => 'application/json' },
         body: {
-          id: '10230653256947200',
-          name: 'Claudio Poli',
-          email: 'claudio@icorete.ch'
+          id: '12345678901234567',
+          name: 'Sample User',
+          email: 'sample.user@example.test'
         }.to_json
       )
   end
