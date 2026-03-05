@@ -27,7 +27,8 @@ Configure OmniAuth in your Rack/Rails app:
 Rails.application.config.middleware.use OmniAuth::Builder do
   provider :facebook2,
            ENV.fetch('FACEBOOK_APP_ID'),
-           ENV.fetch('FACEBOOK_APP_SECRET')
+           ENV.fetch('FACEBOOK_APP_SECRET'),
+           api_version: 'v26.0' # optional; default is v25.0
 end
 ```
 
@@ -52,6 +53,7 @@ end
 Supported request/provider options include:
 
 - `scope` (default: `email`)
+- `api_version` (default: `v25.0`)
 - `display`
 - `auth_type` (example: `rerequest`)
 - `config_id` (Facebook Login for Business)
@@ -61,6 +63,19 @@ Supported request/provider options include:
 - `image_size` (symbol/string like `:normal`, or hash `{ width:, height: }`)
 - `secure_image_url` (default: `true`)
 - `callback_url` / `callback_path`
+
+If you need full endpoint control, `client_options` still works and takes precedence over `api_version`:
+
+```ruby
+provider :facebook2,
+         ENV.fetch('FACEBOOK_APP_ID'),
+         ENV.fetch('FACEBOOK_APP_SECRET'),
+         client_options: {
+           site: 'https://graph.facebook.com/v26.0',
+           authorize_url: 'https://www.facebook.com/v26.0/dialog/oauth',
+           token_url: 'oauth/access_token'
+         }
+```
 
 ## Auth Hash
 
@@ -111,11 +126,11 @@ RAILS_VERSION='~> 8.1.0' bundle exec rake test_rails_integration
 
 ## Endpoints
 
-Default endpoints target Facebook Graph API `v25.0`:
+Default endpoints target Facebook Graph API `v25.0` (or `vX.Y` set via `api_version`):
 
-- Authorize: `https://www.facebook.com/v25.0/dialog/oauth`
-- Token: `https://graph.facebook.com/v25.0/oauth/access_token`
-- User info: `https://graph.facebook.com/v25.0/me`
+- Authorize: `https://www.facebook.com/vX.Y/dialog/oauth`
+- Token: `https://graph.facebook.com/vX.Y/oauth/access_token`
+- User info: `https://graph.facebook.com/vX.Y/me`
 
 ## Test Structure
 

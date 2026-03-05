@@ -14,9 +14,11 @@ module OmniAuth
       DEFAULT_SCOPE = 'email'
       DEFAULT_FACEBOOK_API_VERSION = 'v25.0'
       DEFAULT_INFO_FIELDS = 'name,email'
+      DEFAULT_TOKEN_URL = 'oauth/access_token'
 
       option :name, 'facebook2'
       option :scope, DEFAULT_SCOPE
+      option :api_version, DEFAULT_FACEBOOK_API_VERSION
       option :authorize_options, %i[scope display auth_type config_id redirect_uri]
       option :secure_image_url, true
       option :appsecret_proof, true
@@ -25,7 +27,7 @@ module OmniAuth
       option :client_options,
              site: "https://graph.facebook.com/#{DEFAULT_FACEBOOK_API_VERSION}",
              authorize_url: "https://www.facebook.com/#{DEFAULT_FACEBOOK_API_VERSION}/dialog/oauth",
-             token_url: 'oauth/access_token',
+             token_url: DEFAULT_TOKEN_URL,
              connection_opts: {
                headers: {
                  user_agent: 'icoretech-omniauth-facebook2 gem',
@@ -96,6 +98,14 @@ module OmniAuth
         fail!(:no_authorization_code, e)
       rescue OmniAuth::Facebook2::SignedRequest::UnknownSignatureAlgorithmError => e
         fail!(:unknown_signature_algorithm, e)
+      end
+
+      def client
+        @client ||= ::OAuth2::Client.new(
+          options.client_id,
+          options.client_secret,
+          deep_symbolize(normalized_client_options)
+        )
       end
 
       def callback_url
@@ -199,6 +209,38 @@ module OmniAuth
       def token_scope
         token_params = access_token.respond_to?(:params) ? access_token.params : {}
         token_params['scope'] || (access_token['scope'] if access_token.respond_to?(:[]))
+      end
+
+      def normalized_client_options
+        client_options = options.client_options.to_h.transform_keys(&:to_sym)
+        version = options[:api_version]
+        return client_options if blank?(version)
+
+        current_site = client_options[:site]
+        current_authorize_url = client_options[:authorize_url]
+        current_token_url = client_options[:token_url]
+        default_site = graph_site_for(DEFAULT_FACEBOOK_API_VERSION)
+        default_authorize_url = authorize_url_for(DEFAULT_FACEBOOK_API_VERSION)
+
+        client_options[:site] = graph_site_for(version) if default_endpoint?(current_site, default_site)
+        if default_endpoint?(current_authorize_url, default_authorize_url)
+          client_options[:authorize_url] = authorize_url_for(version)
+        end
+        client_options[:token_url] = DEFAULT_TOKEN_URL if blank?(current_token_url)
+
+        client_options
+      end
+
+      def graph_site_for(version)
+        "https://graph.facebook.com/#{version}"
+      end
+
+      def authorize_url_for(version)
+        "https://www.facebook.com/#{version}/dialog/oauth"
+      end
+
+      def default_endpoint?(value, default_value)
+        blank?(value) || value == default_value
       end
 
       def blank?(value)

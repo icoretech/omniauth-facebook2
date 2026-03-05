@@ -25,6 +25,63 @@ class OmniauthFacebook2Test < Minitest::Test
     assert_equal 'facebook', legacy.options.name
   end
 
+  def test_api_version_updates_default_endpoints
+    previous_request_validation_phase = OmniAuth.config.request_validation_phase
+    OmniAuth.config.request_validation_phase = nil
+
+    app = ->(_env) { [404, { 'Content-Type' => 'text/plain' }, ['not found']] }
+    strategy = OmniAuth::Strategies::Facebook2.new(
+      app,
+      'client-id',
+      'client-secret',
+      api_version: 'v26.0'
+    )
+    env = Rack::MockRequest.env_for('/auth/facebook2', method: 'POST')
+    env['rack.session'] = {}
+
+    status, headers, = strategy.call(env)
+
+    assert_equal 302, status
+
+    location = URI.parse(headers.fetch('Location'))
+
+    assert_equal '/v26.0/dialog/oauth', location.path
+    assert_equal 'https://graph.facebook.com/v26.0', strategy.client.site
+  ensure
+    OmniAuth.config.request_validation_phase = previous_request_validation_phase
+  end
+
+  def test_api_version_does_not_override_explicit_custom_endpoints
+    previous_request_validation_phase = OmniAuth.config.request_validation_phase
+    OmniAuth.config.request_validation_phase = nil
+
+    app = ->(_env) { [404, { 'Content-Type' => 'text/plain' }, ['not found']] }
+    strategy = OmniAuth::Strategies::Facebook2.new(
+      app,
+      'client-id',
+      'client-secret',
+      api_version: 'v26.0',
+      client_options: {
+        site: 'https://graph.facebook.com/custom',
+        authorize_url: 'https://www.facebook.com/custom/dialog/oauth',
+        token_url: 'oauth/access_token'
+      }
+    )
+    env = Rack::MockRequest.env_for('/auth/facebook2', method: 'POST')
+    env['rack.session'] = {}
+
+    status, headers, = strategy.call(env)
+
+    assert_equal 302, status
+
+    location = URI.parse(headers.fetch('Location'))
+
+    assert_equal '/custom/dialog/oauth', location.path
+    assert_equal 'https://graph.facebook.com/custom', strategy.client.site
+  ensure
+    OmniAuth.config.request_validation_phase = previous_request_validation_phase
+  end
+
   def test_authorize_params_support_request_overrides
     strategy = build_strategy
     request = Rack::Request.new(
