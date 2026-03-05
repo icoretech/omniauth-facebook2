@@ -1,7 +1,7 @@
 # OmniAuth Facebook2 Strategy
 
 [![Test](https://github.com/icoretech/omniauth-facebook2/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/icoretech/omniauth-facebook2/actions/workflows/test.yml?query=branch%3Amain)
-[![Gem Version](https://img.shields.io/gem/v/omniauth-facebook2.svg)](https://rubygems.org/gems/omniauth-facebook2)
+[![Gem Version](https://badge.fury.io/rb/omniauth-facebook2.svg)](https://badge.fury.io/rb/omniauth-facebook2)
 
 `omniauth-facebook2` provides a Facebook OAuth2 strategy for OmniAuth.
 
