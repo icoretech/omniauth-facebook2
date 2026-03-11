@@ -93,11 +93,17 @@ module OmniAuth
       end
 
       def callback_phase
+        return fail_state_mismatch if missing_session_state?
+
         with_authorization_code! { super }
       rescue NoAuthorizationCodeError => e
         fail!(:no_authorization_code, e)
       rescue OmniAuth::Facebook2::SignedRequest::UnknownSignatureAlgorithmError => e
         fail!(:unknown_signature_algorithm, e)
+      rescue NoMethodError => e
+        raise unless oauth_state_nil_compare_error?(e)
+
+        fail_state_mismatch
       end
 
       def client
@@ -211,6 +217,21 @@ module OmniAuth
         token_params['scope'] || (access_token['scope'] if access_token.respond_to?(:[]))
       end
 
+      def missing_session_state?
+        present?(request.params['state']) && blank?(session['omniauth.state'])
+      end
+
+      def oauth_state_nil_compare_error?(error)
+        error.message.include?("undefined method 'bytesize' for nil")
+      end
+
+      def fail_state_mismatch
+        fail!(
+          :csrf_detected,
+          OmniAuth::Strategies::OAuth2::CallbackError.new(:csrf_detected, 'OAuth state was missing or mismatched')
+        )
+      end
+
       def normalized_client_options
         client_options = options.client_options.to_h.transform_keys(&:to_sym)
         version = options[:api_version]
@@ -245,6 +266,10 @@ module OmniAuth
 
       def blank?(value)
         value.nil? || (value.respond_to?(:empty?) && value.empty?)
+      end
+
+      def present?(value)
+        !blank?(value)
       end
     end
 
