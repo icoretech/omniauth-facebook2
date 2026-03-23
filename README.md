@@ -1,4 +1,4 @@
-# OmniAuth Facebook2 Strategy
+# OmniAuth Facebook Strategy
 
 [![Test](https://github.com/icoretech/omniauth-facebook2/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/icoretech/omniauth-facebook2/actions/workflows/test.yml?query=branch%3Amain)
 [![Gem Version](https://badge.fury.io/rb/omniauth-facebook2.svg)](https://badge.fury.io/rb/omniauth-facebook2)
