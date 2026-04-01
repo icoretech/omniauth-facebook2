@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'base64'
-require 'json'
-require 'openssl'
+require "base64"
+require "json"
+require "openssl"
 
 module OmniAuth
   module Facebook2
@@ -10,7 +10,7 @@ module OmniAuth
     class SignedRequest
       class UnknownSignatureAlgorithmError < NotImplementedError; end
 
-      SUPPORTED_ALGORITHM = 'HMAC-SHA256'
+      SUPPORTED_ALGORITHM = "HMAC-SHA256"
 
       attr_reader :value, :secret
 
@@ -30,26 +30,26 @@ module OmniAuth
       private
 
       def parse_signed_request
-        signature, encoded_payload = value.to_s.split('.', 2)
+        signature, encoded_payload = value.to_s.split(".", 2)
         return if blank?(signature) || blank?(encoded_payload)
 
         decoded_signature = base64_decode_url(signature)
         decoded_payload = JSON.parse(base64_decode_url(encoded_payload))
 
-        unless decoded_payload['algorithm'] == SUPPORTED_ALGORITHM
-          raise UnknownSignatureAlgorithmError, "unknown algorithm: #{decoded_payload['algorithm']}"
+        unless decoded_payload["algorithm"] == SUPPORTED_ALGORITHM
+          raise UnknownSignatureAlgorithmError, "unknown algorithm: #{decoded_payload["algorithm"]}"
         end
 
         decoded_payload if valid_signature?(decoded_signature, encoded_payload)
       end
 
-      def valid_signature?(signature, payload, algorithm = OpenSSL::Digest.new('SHA256'))
+      def valid_signature?(signature, payload, algorithm = OpenSSL::Digest.new("SHA256"))
         OpenSSL::HMAC.digest(algorithm, secret, payload) == signature
       end
 
       def base64_decode_url(value)
-        value += '=' * ((4 - value.size.modulo(4)) % 4)
-        Base64.decode64(value.tr('-_', '+/'))
+        value += "=" * ((4 - value.size.modulo(4)) % 4)
+        Base64.decode64(value.tr("-_", "+/"))
       end
 
       def blank?(value)

@@ -1,3 +1,3 @@
 # frozen_string_literal: true
 
-require 'omniauth/facebook2'
+require "omniauth/facebook2"

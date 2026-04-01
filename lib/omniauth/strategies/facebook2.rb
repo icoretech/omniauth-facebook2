@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'omniauth-oauth2'
-require 'openssl'
-require 'rack/utils'
-require 'uri'
+require "omniauth-oauth2"
+require "openssl"
+require "rack/utils"
+require "uri"
 
 module OmniAuth
   module Strategies
@@ -11,12 +11,12 @@ module OmniAuth
     class Facebook2 < OmniAuth::Strategies::OAuth2
       class NoAuthorizationCodeError < StandardError; end
 
-      DEFAULT_SCOPE = 'email'
-      DEFAULT_FACEBOOK_API_VERSION = 'v25.0'
-      DEFAULT_INFO_FIELDS = 'name,email'
-      DEFAULT_TOKEN_URL = 'oauth/access_token'
+      DEFAULT_SCOPE = "email"
+      DEFAULT_FACEBOOK_API_VERSION = "v25.0"
+      DEFAULT_INFO_FIELDS = "name,email"
+      DEFAULT_TOKEN_URL = "oauth/access_token"
 
-      option :name, 'facebook2'
+      option :name, "facebook2"
       option :scope, DEFAULT_SCOPE
       option :api_version, DEFAULT_FACEBOOK_API_VERSION
       option :authorize_options, %i[scope display auth_type config_id redirect_uri]
@@ -25,61 +25,61 @@ module OmniAuth
       option :authorization_code_from_signed_request_in_cookie, nil
 
       option :client_options,
-             site: "https://graph.facebook.com/#{DEFAULT_FACEBOOK_API_VERSION}",
-             authorize_url: "https://www.facebook.com/#{DEFAULT_FACEBOOK_API_VERSION}/dialog/oauth",
-             token_url: DEFAULT_TOKEN_URL,
-             connection_opts: {
-               headers: {
-                 user_agent: 'icoretech-omniauth-facebook2 gem',
-                 accept: 'application/json',
-                 content_type: 'application/json'
-               }
-             }
+        site: "https://graph.facebook.com/#{DEFAULT_FACEBOOK_API_VERSION}",
+        authorize_url: "https://www.facebook.com/#{DEFAULT_FACEBOOK_API_VERSION}/dialog/oauth",
+        token_url: DEFAULT_TOKEN_URL,
+        connection_opts: {
+          headers: {
+            user_agent: "icoretech-omniauth-facebook2 gem",
+            accept: "application/json",
+            content_type: "application/json"
+          }
+        }
 
       option :access_token_options,
-             header_format: 'OAuth %s',
-             param_name: 'access_token'
+        header_format: "OAuth %s",
+        param_name: "access_token"
 
-      uid { raw_info['id'] }
+      uid { raw_info["id"] }
 
       info do
         prune(
           {
-            'nickname' => raw_info['username'],
-            'email' => raw_info['email'],
-            'name' => raw_info['name'],
-            'first_name' => raw_info['first_name'],
-            'last_name' => raw_info['last_name'],
-            'image' => image_url(uid),
-            'description' => raw_info['bio'],
-            'urls' => {
-              'Facebook' => raw_info['link'],
-              'Website' => raw_info['website']
+            "nickname" => raw_info["username"],
+            "email" => raw_info["email"],
+            "name" => raw_info["name"],
+            "first_name" => raw_info["first_name"],
+            "last_name" => raw_info["last_name"],
+            "image" => image_url(uid),
+            "description" => raw_info["bio"],
+            "urls" => {
+              "Facebook" => raw_info["link"],
+              "Website" => raw_info["website"]
             },
-            'location' => raw_info.dig('location', 'name'),
-            'verified' => raw_info['verified']
+            "location" => raw_info.dig("location", "name"),
+            "verified" => raw_info["verified"]
           }
         )
       end
 
       credentials do
         {
-          'token' => access_token.token,
-          'refresh_token' => access_token.refresh_token,
-          'expires_at' => access_token.expires_at,
-          'expires' => access_token.expires?,
-          'scope' => token_scope
+          "token" => access_token.token,
+          "refresh_token" => access_token.refresh_token,
+          "expires_at" => access_token.expires_at,
+          "expires" => access_token.expires?,
+          "scope" => token_scope
         }.compact
       end
 
       extra do
         data = {}
-        data['raw_info'] = raw_info unless skip_info?
+        data["raw_info"] = raw_info unless skip_info?
         prune(data)
       end
 
       def raw_info
-        @raw_info ||= access_token.get('me', info_options).parsed || {}
+        @raw_info ||= access_token.get("me", info_options).parsed || {}
       end
 
       def info_options
@@ -89,7 +89,7 @@ module OmniAuth
         params[:appsecret_proof] = appsecret_proof if options[:appsecret_proof]
         params[:locale] = options[:locale] if options[:locale]
 
-        { params: params }
+        {params: params}
       end
 
       def callback_phase
@@ -115,13 +115,13 @@ module OmniAuth
       end
 
       def callback_url
-        return '' if options.authorization_code_from_signed_request_in_cookie
+        return "" if options.authorization_code_from_signed_request_in_cookie
 
         options[:callback_url] || super
       end
 
       def query_string
-        return '' if request.params['code']
+        return "" if request.params["code"]
 
         super
       end
@@ -163,10 +163,10 @@ module OmniAuth
       end
 
       def with_authorization_code!
-        if request.params.key?('code') && !blank?(request.params['code'])
+        if request.params.key?("code") && !blank?(request.params["code"])
           yield
-        elsif (code_from_signed_request = signed_request_from_cookie && signed_request_from_cookie['code'])
-          request.params['code'] = code_from_signed_request
+        elsif (code_from_signed_request = signed_request_from_cookie && signed_request_from_cookie["code"])
+          request.params["code"] = code_from_signed_request
           options.authorization_code_from_signed_request_in_cookie = true
           original_provider_ignores_state = options.provider_ignores_state
           options.provider_ignores_state = true
@@ -174,13 +174,13 @@ module OmniAuth
           begin
             yield
           ensure
-            request.params.delete('code')
+            request.params.delete("code")
             options.authorization_code_from_signed_request_in_cookie = false
             options.provider_ignores_state = original_provider_ignores_state
           end
         else
           raise NoAuthorizationCodeError,
-                'must pass either a `code` (query param) or an `fbsr_<app_id>` signed request cookie'
+            "must pass either a `code` (query param) or an `fbsr_<app_id>` signed request cookie"
         end
       end
 
@@ -199,26 +199,26 @@ module OmniAuth
         url = uri_class.build(host: site_uri.host, path: "#{site_uri.path}/#{user_id}/picture")
 
         query = if options[:image_size].is_a?(String) || options[:image_size].is_a?(Symbol)
-                  { type: options[:image_size] }
-                elsif options[:image_size].is_a?(Hash)
-                  options[:image_size]
-                end
+          {type: options[:image_size]}
+        elsif options[:image_size].is_a?(Hash)
+          options[:image_size]
+        end
         url.query = Rack::Utils.build_query(query) if query
 
         url.to_s
       end
 
       def appsecret_proof
-        @appsecret_proof ||= OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('SHA256'), client.secret, access_token.token)
+        @appsecret_proof ||= OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("SHA256"), client.secret, access_token.token)
       end
 
       def token_scope
         token_params = access_token.respond_to?(:params) ? access_token.params : {}
-        token_params['scope'] || (access_token['scope'] if access_token.respond_to?(:[]))
+        token_params["scope"] || (access_token["scope"] if access_token.respond_to?(:[]))
       end
 
       def missing_session_state?
-        present?(request.params['state']) && blank?(session['omniauth.state'])
+        present?(request.params["state"]) && blank?(session["omniauth.state"])
       end
 
       def oauth_state_nil_compare_error?(error)
@@ -228,7 +228,7 @@ module OmniAuth
       def fail_state_mismatch
         fail!(
           :csrf_detected,
-          OmniAuth::Strategies::OAuth2::CallbackError.new(:csrf_detected, 'OAuth state was missing or mismatched')
+          OmniAuth::Strategies::OAuth2::CallbackError.new(:csrf_detected, "OAuth state was missing or mismatched")
         )
       end
 
@@ -275,10 +275,10 @@ module OmniAuth
 
     # Backward-compatible strategy name for existing `facebook` callback paths.
     class Facebook < Facebook2
-      option :name, 'facebook'
+      option :name, "facebook"
     end
   end
 end
 
-OmniAuth.config.add_camelization 'facebook2', 'Facebook2'
-OmniAuth.config.add_camelization 'facebook', 'Facebook'
+OmniAuth.config.add_camelization "facebook2", "Facebook2"
+OmniAuth.config.add_camelization "facebook", "Facebook"
